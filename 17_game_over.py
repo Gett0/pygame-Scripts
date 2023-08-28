@@ -109,6 +109,7 @@ def main():
 		game.run_logic()
 		game.display_frame(screen)
 		clock.tick(60)
+		
 	pygame.quit()
 
 
