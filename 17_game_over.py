@@ -20,6 +20,20 @@ class Meteor(pygame.sprite.Sprite):
 			self.rect.x = random.randrange(SCREEN_WIDTH)
 
 
+
+class Disparo(pygame.sprite.Sprite):
+	def __init__(self, player):
+		super().__init__()
+		self.player = player
+		self.image = pygame.image.load("laser.png").convert()
+		self.image.set_colorkey(BLACK)
+		self.rect = self.image.get_rect()
+
+	def update(self):
+		self.rect.y -= 3
+
+
+
 class Player(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
@@ -33,6 +47,7 @@ class Player(pygame.sprite.Sprite):
 		self.rect.y = mouse_pos[1]
 
 
+
 class Game(object):
 	def __init__(self):
 		self.game_over = False
@@ -41,8 +56,9 @@ class Game(object):
 
 		self.meteor_list = pygame.sprite.Group()
 		self.all_sprites_list = pygame.sprite.Group()
-
-
+		self.disparos_list = pygame.sprite.Group()
+		self.meteoros_disparados_list = pygame.sprite.Group()
+		
 		for i in range(50):
 			meteor = Meteor()
 			meteor.rect.x = random.randrange(SCREEN_WIDTH)
@@ -53,11 +69,24 @@ class Game(object):
 
 		self.player = Player()
 		self.all_sprites_list.add(self.player)
+		self.laser = Disparo(self.player)
+
 
 	def process_events(self):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return True
+	
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_SPACE:
+					print("Barra espaciadora pulsada")
+					self.laser = Disparo(self.player)
+					self.laser.rect.x = self.player.rect.x + 45
+					self.laser.rect.y = self.player.rect.y - 20
+
+					self.all_sprites_list.add(self.laser)
+					self.disparos_list.add(self.laser)
+
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if self.game_over:
@@ -65,13 +94,20 @@ class Game(object):
 
 		return False
 
+
 	def run_logic(self):
 
 		if not self.game_over:
 			self.all_sprites_list.update()
 
 			meteor_hit_list = pygame.sprite.spritecollide(self.player, self.meteor_list, True)
+			
+			for tiro in self.disparos_list:
+				self.meteoros_disparados_list = pygame.sprite.spritecollide(self.laser, self.meteor_list, True)
 
+			for impacto in self.meteoros_disparados_list:
+				self.score += 3
+	
 			for meteor in meteor_hit_list:
 				self.score += 1
 				print(self.score)
@@ -94,6 +130,9 @@ class Game(object):
 
 		pygame.display.flip()
 
+
+
+
 def main():
 	pygame.init()
 
@@ -109,7 +148,7 @@ def main():
 		game.run_logic()
 		game.display_frame(screen)
 		clock.tick(60)
-		
+
 	pygame.quit()
 
 
