@@ -130,9 +130,6 @@ class Game(object):
 
 		pygame.display.flip()
 
-
-
-
 def main():
 	pygame.init()
 
